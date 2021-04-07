@@ -1,18 +1,25 @@
-const { exec } = require('child_process');
 var tmi = require('tmi.js');
-const hostname = '127.0.0.1';
-const port = 1337;
 var http = require('http'),
-    filePath = 'troubadour.mp3',
-const server = http.createServer(function (request, response) {
+	fs = require('fs'),
+	extension = '.mp3',
+	testFolder = 'audio';
+const { exec } = require('child_process');
+server = http.createServer(function (request, response) {
 	response.statusCode = 200;
 	response.setHeader('Content-Type', 'text/plain');
-	response.end('Hello World');
-})
+	response.end('BanquiseBot is listen your channel !');
+}).listen(process.env.PORT || 3000)
 
-server.listen(port, hostname, () => {
-	console.log(`Server running at http://${hostname}:${port}/`);
+let commandsFileObject = fs.readdirSync(testFolder).map(value => {
+	if (value.includes(extension)) {
+		const valueWithoutExtention = value.split('.')[0];
+		return {
+			fileName: value,
+			command: `!${valueWithoutExtention}`,
+		};
+	}
 });
+commandsFileObject = commandsFileObject.filter(value => value !== undefined);
 
 const client = new tmi.Client({
 	options: { debug: true, messagesLogLevel: "info" },
@@ -33,14 +40,16 @@ client.on('connected', (address, port) => {
 })
 
 client.on('chat', (channel, user, message, self) => {
-	if (message === '!toto') {
-		exec(`mplayer ${filePath}`, (error, stdout, stderr) => {
-			if (error) {
-			  console.error(`exec error: ${error}`);
-			  return;
-			}
-			console.log(`stdout: ${stdout}`);
-			console.error(`stderr: ${stderr}`);
-		});
+	let filename = '';
+	if (commandsFileObject.some(item => {
+		if (item.command === message) {
+			filename = item.fileName;
+			return true;
+		}
+		return false;
+	})
+	) {
+		//load(`${testFolder}/${filename}`).then(play);
+		exec(`mplayer ${testFolder}/${filename}`);
 	}
 })

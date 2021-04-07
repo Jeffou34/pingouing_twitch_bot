@@ -4,7 +4,8 @@
   "description": "A twitch bot for https://www.twitch.tv/pingouiing",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,8 @@
   },
   "homepage": "https://github.com/Jeffou34/pingouing_twitch_bot#readme",
   "dependencies": {
+    "audio-loader": "^1.0.3",
+    "audio-play": "^2.3.1",
     "tmi.js": "^1.7.5"
   }
 }
