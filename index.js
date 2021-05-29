@@ -3,7 +3,7 @@ var http = require('http'),
 	fs = require('fs'),
 	extension = '.mp3',
 	testFolder = 'audio';
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 server = http.createServer(function (request, response) {
 	response.statusCode = 200;
 	response.setHeader('Content-Type', 'text/plain');
@@ -39,6 +39,11 @@ client.on('connected', (address, port) => {
     client.action('pingouiing', 'BanquiseBot est en ligne !');
 })
 
+var active = true;
+var ms = 1000;
+var cooldown = 120*ms;
+var start = null;
+var end = null;
 client.on('chat', (channel, user, message, self) => {
 	let filename = '';
 	if (commandsFileObject.some(item => {
@@ -47,9 +52,16 @@ client.on('chat', (channel, user, message, self) => {
 			return true;
 		}
 		return false;
-	})
-	) {
-		//load(`${testFolder}/${filename}`).then(play);
-		exec(`mplayer ${testFolder}/${filename}`);
+	})) {
+		if (active) {
+			execSync(`mplayer ${testFolder}/${filename}`);
+			active = false;
+			start = Date.now();
+			end = Date.now() + cooldown;
+			setTimeout(() => {active = true;}, cooldown)
+		} else {
+			let timeRemaining = end - Date.now();
+			client.say('pingouiing', `Commande disponible dans ${Math.floor(timeRemaining / 1000)} secondes`);
+		}
 	}
 })
